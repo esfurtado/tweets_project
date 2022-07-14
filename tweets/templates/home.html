@@ -1,13 +1,9 @@
+<h1>Tweets home page</h1>
+<p>Hi! Welcome to the home page.</p>
+<p><a href="{% url 'login' %}">Login</a></p>
+<p><a href="{% url 'registration' %}">Register</a></p>
 {% if user.is_authenticated %}
-  <h1>Tweets account page</h1>
-  <p>Hi {{ user.username }}! Welcome to the home page.</p>
-  <p>Name with handle</p>
-  <p>Button to add message</p>
-  <p>Latest messages</p>
-  <p><a href="{% url 'logout' %}">Log Out</a></p>
+<p><a href="{% url 'profile' user.username %}">Visit Profile</a></p>
 {% endif %}
-
-
-
 
 
