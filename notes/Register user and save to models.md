@@ -44,6 +44,17 @@ urlpatterns = [
     path('registration', views.registration, name='registration'),
     path('registration/submit', views.registration_submit, name='registration_submit')
 ```
+# Using the database
+
+I create a model class in the `models.py` file that extends django's `db.django.model.Model` class.
+
+To query tables:
+
+* sqlite3 .\db.sqlite3 (command to use db inside the projects folder)
+* .tables - to find all tables
+* .headers on - to find columns (attributes)
+* select * from table's name - to find all users inside the table
+* Note that to find which ones have empty fields we have to find them by querying -  where (field) `=''`. It does not appear as null.
 
 
 

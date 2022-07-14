@@ -1,6 +1,8 @@
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
-from django.http import HttpResponse
+
 from tweets.models import Profile, User
+
 #from django.contrib.auth import login
 #Note that the login template already sends a message saying login not successful if invalid credentials are used
 
@@ -9,7 +11,13 @@ def home(request):
 
 
 def registration(request):
-    return render(request, 'registration.html', context={})
+    #if user is already registered they can edit their details
+    #if not they can register and create a new profile
+    if request.user.is_authenticated:
+        return redirect('edit')
+    else:
+        return render(request, 'registration.html', context={})
+
 
 def registration_submit(request):
     first_name = request.POST["first_name"]
@@ -25,10 +33,16 @@ def registration_submit(request):
         err_msg = "Username already exists"
         return render(request, 'registration.html', context={'error': err_msg})
 
-    #Validate password
+    # Validate password
     if password != confirm_password:
             err_msg = "Your password confirmation did not match your password"
             return render(request, 'registration.html', context={'error': err_msg})
+    
+    # Validate email
+    same_email = User.objects.filter(email=email).count()
+    if same_email > 0:
+        err_msg = "You already have an account with this email"
+        return render(request, 'registration.html', context={'error': err_msg})
 
     # Save to database
     u = User.objects.create_user(username, password=password)
@@ -36,3 +50,49 @@ def registration_submit(request):
     p.save()
 
     return redirect('login')
+
+
+def profile(request, username):
+    if request.user.username == username:
+        return render(request, 'profile.html',context={})
+    else:
+        raise PermissionDenied()
+
+
+def edit(request):
+    if request.user.is_authenticated:
+        user = request.user
+        profile = Profile.objects.get(user_id=user.id)
+
+        return render(request, 'edit.html', context={ 'profile': profile })
+            # 'current_firstname': profile.first_name, 'current_lastname:': profile.last_name, 'current_email': profile.email, 'current_contact': profile.contact_number})
+    else:
+        return redirect('login')
+
+
+def edit_submit(request):
+    new_firstname = request.POST["new_firstname"]
+    new_lastname = request.POST["new_lastname"]
+    new_email = request.POST["new_email"]
+    new_contact = request.POST["new_contact"]
+
+    print(f"{new_lastname}")
+    user = request.user
+    profile : Profile = Profile.objects.get(user_id=user.id)
+    
+    #If user changed a field, save to database, otherwise do nothing
+    if new_firstname !='':
+        profile.first_name = new_firstname
+ 
+    if new_lastname != '':
+        profile.last_name = new_lastname
+    
+    if new_email !='':
+        profile.email = new_email
+    
+    if new_contact !='':
+        profile.contact_number = new_contact
+
+    profile.save()
+    return redirect('profile', user.username)
+

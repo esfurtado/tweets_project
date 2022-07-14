@@ -1,0 +1,22 @@
+<h1>Edit your account details</h1>
+<br/>
+<p>First name: {{ profile.first_name }}</p>
+<p>Last name: {{ profile.last_name }}</p>
+<p>Email: {{ profile.email }}</p>
+<p>Contact number: {{ profile.contact_number }}</p>
+<form action="{% url 'edit_submit' %}" method="POST">
+    {% csrf_token %}
+    <label for="new_firstname">Edit first name:</label>
+    <input type="text" name="new_firstname" id="new_firstname">
+    <br/>
+    <label for="new_lastname">Edit last name:</label>
+    <input type="text" name="new_lastname" id="new_lastname">
+    <br/>
+    <label for="new_email">Edit email:</label>
+    <input type="email" name="new_email" id="new_email">
+    <br/>
+    <label for="new_contact">Edit contact number:</label>
+    <input type="text" name="new_contact" id="new_contact">
+    <br/>
+    <input type="submit" value="Save">
+</form>
