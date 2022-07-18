@@ -1,10 +1,11 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
 
-from tweets.models import Profile, User
+from tweets.models import Profile, TweetsReplies, User, Tweets
 
-#from django.contrib.auth import login
+
 #Note that the login template already sends a message saying login not successful if invalid credentials are used
+#As this was not 
 
 def home(request):
     return render(request, 'home.html', context={})
@@ -53,8 +54,10 @@ def registration_submit(request):
 
 
 def profile(request, username):
+    user = request.user
     if request.user.username == username:
-        return render(request, 'profile.html',context={})
+        tweet_messages = Tweets.objects.all().filter(user_id=user.id)[:10]
+        return render(request, 'profile.html',context={'tweet_messages':tweet_messages})
     else:
         raise PermissionDenied()
 
@@ -65,7 +68,6 @@ def edit(request):
         profile = Profile.objects.get(user_id=user.id)
 
         return render(request, 'edit.html', context={ 'profile': profile })
-            # 'current_firstname': profile.first_name, 'current_lastname:': profile.last_name, 'current_email': profile.email, 'current_contact': profile.contact_number})
     else:
         return redirect('login')
 
@@ -76,7 +78,6 @@ def edit_submit(request):
     new_email = request.POST["new_email"]
     new_contact = request.POST["new_contact"]
 
-    print(f"{new_lastname}")
     user = request.user
     profile : Profile = Profile.objects.get(user_id=user.id)
     
@@ -96,3 +97,24 @@ def edit_submit(request):
     profile.save()
     return redirect('profile', user.username)
 
+
+def tweet_add(request):
+    #post message
+    new_tweet = request.POST['new_tweet']
+    #save message to database
+    user= request.user
+    tweet_message = Tweets(user=user, tweet_message=new_tweet)
+    tweet_message.save()
+    
+    return redirect('profile', user.username)
+
+def tweet_reply(request, tweet_id):
+    #add reply message
+    new_reply = request.POST['reply']
+    tweet = Tweets.objects.get(id=tweet_id)
+    #save reply to database
+    user = request.user
+    tweet_reply = TweetsReplies(user=user, tweet_message=new_reply, tweet=tweet)
+    tweet_reply.save()
+
+    return redirect('profile', user.username)

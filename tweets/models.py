@@ -8,10 +8,22 @@ from django.contrib.auth.models import User
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    first_name = models.CharField(max_length=30)#How to make this a required field
+    first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     email = models.EmailField()
     contact_number = models.CharField(max_length=30)
-    
 
+class Tweets(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tweet_message = models.TextField(max_length=144)
+    post_time = models.DateTimeField(auto_now_add=True)
+
+    def all_replies(self):
+        return TweetsReplies.objects.filter(tweet_id=self.id)
+    
+class TweetsReplies(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tweet_message = models.TextField(max_length=144)
+    post_time = models.DateTimeField(auto_now_add=True)
+    tweet = models.ForeignKey(Tweets, on_delete=models.CASCADE)
 
