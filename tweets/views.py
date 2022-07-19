@@ -40,7 +40,7 @@ def registration_submit(request):
             return render(request, 'registration.html', context={'error': err_msg})
     
     # Validate email
-    same_email = User.objects.filter(email=email).count()
+    same_email = Profile.objects.filter(email=email).count()
     if same_email > 0:
         err_msg = "You already have an account with this email"
         return render(request, 'registration.html', context={'error': err_msg})
