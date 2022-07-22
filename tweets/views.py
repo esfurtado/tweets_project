@@ -3,6 +3,9 @@ from django.shortcuts import redirect, render
 
 from tweets.models import Profile, TweetsReplies, User, Tweets
 
+import logging
+
+logger = logging.getLogger('tweets')
 
 #Note that the login template already sends a message saying login not successful if invalid credentials are used
 #As this was not 
@@ -49,6 +52,7 @@ def registration_submit(request):
     u = User.objects.create_user(username, password=password)
     p = Profile(user=u, first_name=first_name, last_name=last_name, email=email)
     p.save()
+    logger.info(f'User {u.username} saved to database')
 
     return redirect('login')
 
@@ -105,6 +109,7 @@ def tweet_add(request):
     user= request.user
     tweet_message = Tweets(user=user, tweet_message=new_tweet)
     tweet_message.save()
+    logger.info(f'User {user.username} posted: {tweet_message.tweet_message}')
     
     return redirect('profile', user.username)
 
@@ -116,5 +121,6 @@ def tweet_reply(request, tweet_id):
     user = request.user
     tweet_reply = TweetsReplies(user=user, tweet_message=new_reply, tweet=tweet)
     tweet_reply.save()
+    logger.info(f'User {user.username} replied: {tweet_reply.tweet_message} on tweet with id {tweet.id}')
 
     return redirect('profile', user.username)

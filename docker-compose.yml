@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  tweets_project:
+    build: .
+    command:
+      # this `/bin/bash -c` is used to run multiple commands in a row
+      - /bin/bash
+      - -c
+      - |
+        python manage.py migrate 
+        python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000:8000
