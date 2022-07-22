@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'django_elasticsearch_dsl',
 ]
 
 MIDDLEWARE = [
@@ -148,25 +147,25 @@ LOGGING = {
             'formatter': 'simple'
         },
     
-        # 'logstash': {
-        #     'level': 'INFO',
-        #     'class': 'logstash.TCPLogstashHandler',
-        #     'host': 'localhost',
-        #     'port': 5959,
-        #     'version': 1,
-        #     'message_type': 'tweets',
-        #     'fqdn': False,
-        #     'tags': ['django.request'],
-        # },
+        'logstash': {
+            'level': 'INFO',
+            'class': 'logstash.TCPLogstashHandler',
+            'host': 'localhost',
+            'port': 50000, # I selected this port whilst using ELK on Docker and it worked
+            'version': 1,
+            'message_type': 'tweets',
+            'fqdn': False,
+            'tags': ['tweets_project'],
+        },
     },
     'loggers': {
-        # 'tweets.request': {
-        #     'handlers' : ['console'],
-        #     'level': 'INFO',
-        #     'propagate': True,
-        # },
+        'django': {
+            'handlers' : ['logstash', 'console'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
         'tweets': {
-            'handlers': ['console'],
+            'handlers': ['logstash', 'console'],
             'level': 'INFO',
         },
     }
