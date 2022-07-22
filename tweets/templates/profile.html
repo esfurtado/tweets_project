@@ -1,9 +1,37 @@
 {% if user.is_authenticated %}
 <h1>Tweets account page</h1>
-<p>Hi {{ user.username }}! Welcome to the home page.</p>
-<p>Name with handle</p>
-<p>Button to add message</p>
-<p>Latest messages</p>
+<h2>@{{ user.username }}!</h2>
+
+
+<form action="/tweets/add/" method="POST">
+    {% csrf_token %}
+    <p><label for="new_tweet">New tweet message:</label></p>
+    <textarea id="new_tweet" name="new_tweet" rows="4" cols="50"></textarea>
+    <br>
+    <input type="submit" value="Submit">
+</form>
+
+<h3>Latest messages</h3>
+<ul>
+{% for tweet in tweet_messages %}
+    <li><p> <a href="{% url 'profile' tweet.user.username %}">@{{tweet.user.username}}</a> on {{tweet.post_time}}: {{ tweet.tweet_message }}</p>
+        <form action="/tweets/reply_submit/{{tweet.id}}" method="POST">
+            {% csrf_token %}
+            <p><label for="reply">Reply:</label></p>
+            <textarea id="reply" name="reply" rows="4" cols="50"></textarea>
+            <br>
+            <input type="submit" value="Submit">
+        </form>
+        <ul>
+            {% for reply in tweet.all_replies %}
+                <li><p><a href="{% url 'profile' reply.user.username %}">@{{reply.user.username}}</a> on {{reply.post_time}}: {{ reply.tweet_message }}</p></li>
+            {% endfor %}
+        </ul>
+    </li>
+{% endfor %}
+</ul>
+
+
 <p><a href="{% url 'logout' %}">Log Out</a></p>
 {% else %}
 <p>You're not logged in</p>

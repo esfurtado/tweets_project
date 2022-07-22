@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-d7y8o@7-9mym9s&iapz^ni1xfofsbsf9z6w%*w_a-hm9dioizi
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['0.0.0.0',]
 
 
 # Application definition
@@ -125,3 +125,48 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = "/tweets/"
 LOGOUT_REDIRECT_URL = "/auth/login"
+
+# ELASTICSEARCH_DSL={
+#     'default': {
+#         'hosts': 'localhost: 9200'
+#     }
+# }
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+    
+        'logstash': {
+            'level': 'INFO',
+            'class': 'logstash.TCPLogstashHandler',
+            'host': 'localhost',
+            'port': 50000, # I selected this port whilst using ELK on Docker and it worked
+            'version': 1,
+            'message_type': 'tweets',
+            'fqdn': False,
+            'tags': ['tweets_project'],
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers' : ['logstash', 'console'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'tweets': {
+            'handlers': ['logstash', 'console'],
+            'level': 'INFO',
+        },
+    }
+}

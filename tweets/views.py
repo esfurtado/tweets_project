@@ -1,10 +1,14 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
 
-from tweets.models import Profile, User
+from tweets.models import Profile, TweetsReplies, User, Tweets
 
-#from django.contrib.auth import login
+import logging
+
+logger = logging.getLogger('tweets')
+
 #Note that the login template already sends a message saying login not successful if invalid credentials are used
+#As this was not 
 
 def home(request):
     return render(request, 'home.html', context={})
@@ -39,7 +43,7 @@ def registration_submit(request):
             return render(request, 'registration.html', context={'error': err_msg})
     
     # Validate email
-    same_email = User.objects.filter(email=email).count()
+    same_email = Profile.objects.filter(email=email).count()
     if same_email > 0:
         err_msg = "You already have an account with this email"
         return render(request, 'registration.html', context={'error': err_msg})
@@ -48,13 +52,16 @@ def registration_submit(request):
     u = User.objects.create_user(username, password=password)
     p = Profile(user=u, first_name=first_name, last_name=last_name, email=email)
     p.save()
+    logger.info(f'User {u.username} saved to database')
 
     return redirect('login')
 
 
 def profile(request, username):
+    user = request.user
     if request.user.username == username:
-        return render(request, 'profile.html',context={})
+        tweet_messages = Tweets.objects.all().filter(user_id=user.id)[:10]
+        return render(request, 'profile.html',context={'tweet_messages':tweet_messages})
     else:
         raise PermissionDenied()
 
@@ -65,7 +72,6 @@ def edit(request):
         profile = Profile.objects.get(user_id=user.id)
 
         return render(request, 'edit.html', context={ 'profile': profile })
-            # 'current_firstname': profile.first_name, 'current_lastname:': profile.last_name, 'current_email': profile.email, 'current_contact': profile.contact_number})
     else:
         return redirect('login')
 
@@ -76,7 +82,6 @@ def edit_submit(request):
     new_email = request.POST["new_email"]
     new_contact = request.POST["new_contact"]
 
-    print(f"{new_lastname}")
     user = request.user
     profile : Profile = Profile.objects.get(user_id=user.id)
     
@@ -96,3 +101,26 @@ def edit_submit(request):
     profile.save()
     return redirect('profile', user.username)
 
+
+def tweet_add(request):
+    #post message
+    new_tweet = request.POST['new_tweet']
+    #save message to database
+    user= request.user
+    tweet_message = Tweets(user=user, tweet_message=new_tweet)
+    tweet_message.save()
+    logger.info(f'User {user.username} posted: {tweet_message.tweet_message}')
+    
+    return redirect('profile', user.username)
+
+def tweet_reply(request, tweet_id):
+    #add reply message
+    new_reply = request.POST['reply']
+    tweet = Tweets.objects.get(id=tweet_id)
+    #save reply to database
+    user = request.user
+    tweet_reply = TweetsReplies(user=user, tweet_message=new_reply, tweet=tweet)
+    tweet_reply.save()
+    logger.info(f'User {user.username} replied: {tweet_reply.tweet_message} on tweet with id {tweet.id}')
+
+    return redirect('profile', user.username)
