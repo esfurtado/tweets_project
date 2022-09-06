@@ -21,6 +21,16 @@ class Tweets(models.Model):
     def all_replies(self):
         return TweetsReplies.objects.filter(tweet_id=self.id)
     
+    def get_tweet_message(self):
+        return self.tweet_message
+    
+    def get_post_time(self):
+        return str(self.post_time)
+    
+    def get_user(self):
+        username = User.get_username(self.user)
+        return username
+    
 class TweetsReplies(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tweet_message = models.TextField(max_length=144)
