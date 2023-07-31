@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+# this will format date like:
+# 2022-04-12 14:34
+TWEET_DATE_FORMAT = "%Y-%m-%d %H:%M"
+
 # Note that the user model has already been created with django auth
 # So we use the OneToOneField class to store extra information required for the registration of the tweets app
 # OneToOneField creates a foreign key that connects the Profile table to the user table from Django
@@ -25,7 +29,7 @@ class Tweets(models.Model):
         return self.tweet_message
     
     def get_post_time(self):
-        return str(self.post_time)
+        return self.post_time.strftime(TWEET_DATE_FORMAT)
     
     def get_user(self):
         username = User.get_username(self.user)

@@ -8,7 +8,6 @@ import logging
 logger = logging.getLogger('tweets')
 
 #Note that the login template already sends a message saying login not successful if invalid credentials are used
-#As this was not 
 
 def home(request):
     return render(request, 'home.html', context={})
